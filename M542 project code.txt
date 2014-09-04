@@ -1,0 +1,95 @@
+load("titanic2.sav")
+
+#getting cabin class data
+classliteral<-titanic2$pclass
+
+class1st<-classliteral=="1st"
+class1st<-as.numeric(class1st)
+
+class2nd<-classliteral=="2nd"
+class2nd<-as.numeric(class2nd)
+
+class3rd<-classliteral=="3rd"
+class3rd<-as.numeric(class3rd)
+
+classcrew<-classliteral=="crew"
+classcrew<-as.numeric(classcrew)
+
+#gender data
+sexliteral<-titanic2$sex
+
+sexmale<-sexliteral=="male"
+sexmale<-as.numeric(sexmale)
+
+sexfemale<-sexliteral=="female"
+sexfemale<-as.numeric(sexfemale)
+
+#age
+gaeliteral<-titanic2$age
+
+agechild<-ageliteral=="child"
+agechild<-as.numeric(agechild)
+
+ageadult<-ageliteral=="adult"
+ageadult<-as.numeric(ageadult)
+
+#run glm
+glm.out1<-glm(titanic2$survived~titanic2$pclass+titanic2$age+titanic2$sex)
+glm.out1
+
+#getting table entries:
+fcm<-class1st*agechild*sexmale
+fcms<-class1st*agechild*sexmale*survived
+fcf<-class1st*agechild*sexfemale
+fcfs<-class1st*agechild*sexfemale*survived
+fam<-class1st*ageadult*sexmale
+fams<-class1st*ageadult*sexmale*survived
+faf<-class1st*ageadult*sexfemale
+fafs<-class1st*ageadult*sexfemale*survived
+
+scm<-class2nd*agechild*sexmale
+scms<-class2nd*agechild*sexmale*survived
+scf<-class2nd*agechild*sexfemale
+scfs<-class2nd*agechild*sexfemale*survived
+sam<-class2nd*ageadult*sexmale
+sams<-class2nd*ageadult*sexmale*survived
+saf<-class2nd*ageadult*sexfemale
+safs<-class2nd*ageadult*sexfemale*survived
+
+tcm<-class3rd*agechild*sexmale
+tcms<-class3rd*agechild*sexmale*survived
+tcf<-class3rd*agechild*sexfemale
+tcfs<-class3rd*agechild*sexfemale*survived
+tam<-class3rd*ageadult*sexmale
+tams<-class3rd*ageadult*sexmale*survived
+taf<-class3rd*ageadult*sexfemale
+tafs<-class3rd*ageadult*sexfemale*survived
+
+ccm<-classcrew*agechild*sexmale
+ccms<-classcrew*agechild*sexmale*survived
+ccf<-classcrew*agechild*sexfemale
+ccfs<-classcrew*agechild*sexfemale*survived
+cam<-classcrew*ageadult*sexmale
+cams<-classcrew*ageadult*sexmale*survived
+caf<-classcrew*ageadult*sexfemale
+cafs<-classcrew*ageadult*sexfemale*survived
+
+
+survive <- factor(rep(rep(c("Survived", "Died"), c(4,4)),4))
+age <- factor(rep(rep(c("Child", "Adult"), c(2,2)),8))
+sex <- factor(rep(rep(c("Male", "Female"), 4),4))
+class <- factor(rep(c("first", "second","third","crew"), c(8,8,8,8)))
+
+freq<-c(5,1, 57,140, 0,0, 118,4,  11,13, 14,80, 0,0, 154,13,  13,14, 75,76, 25,17, 387,89,  0,0, 192,20, 0,0, 670,3)
+titanic.data<-data.frame(survive, age, sex, class, freq)
+
+#this does it!
+titanic.table<-xtabs(~survived+classliteral+ageliteral+sexliteral)
+titanic.table
+
+#loglin
+titanic.loglin<-loglin(titanic.table, margin=list(1,2,3,4), param=TRUE)
+
+#logit
+titanic.logit<-glm(survived~class1st+class2nd+class3rd+classcrew+agechild+ageadult+sexmale+sexfemale, family=binomial(logit))
+titanic.logit3<-glm(survived~class1st*sexmale+class2nd*sexmale+class3rd*sexmale+classcrew*sexmale+class1st*agechild+class2nd*agechild+class3rd*agechild+classcrew*agechild, family=binomial(logit))
